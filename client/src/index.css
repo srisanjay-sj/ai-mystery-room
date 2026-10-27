@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Oswald", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --color-blood: #e11d2e;
+  --color-ink: #0a0a0b;
+  --color-panel: #141416;
+}
+
+html, body { background: #0a0a0b; }
+body { font-family: var(--font-body); color: #f5f5f5; }
+
+.bg-spotlight {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(225, 29, 46, 0.28), transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.05), transparent 60%);
+}
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+.animate-fade-up { animation: fade-up 0.8s ease-out both; }
+
+@keyframes flicker {
+  0%, 90%, 100% { opacity: 1; }
+  92% { opacity: 0.35; }
+  94% { opacity: 1; }
+  96% { opacity: 0.55; }
+}
+.animate-flicker { animation: flicker 4s infinite; }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 46, 0.55); }
+  50% { box-shadow: 0 0 32px 6px rgba(225, 29, 46, 0.45); }
+}
+.animate-pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, -40px); }
+}
+.orb { position: absolute; border-radius: 9999px; filter: blur(90px); pointer-events: none; animation: float 12s ease-in-out infinite; }
+.orb-a { width: 380px; height: 380px; background: rgba(225, 29, 46, 0.22); top: 40px; left: -100px; }
+.orb-b { width: 320px; height: 320px; background: rgba(225, 29, 46, 0.14); bottom: 0; right: -80px; animation-delay: -6s; }
+
+@keyframes scan { from { transform: translateY(-10%); } to { transform: translateY(110vh); } }
+.scanline {
+  position: absolute; left: 0; right: 0; top: 0; height: 2px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(225, 29, 46, 0.5), transparent);
+  animation: scan 7s linear infinite;
+}

@@ -37,26 +37,41 @@ ${previousError ? `\nYour previous attempt failed validation: ${previousError}\n
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export async function generateMystery(premise, difficulty, maxAttempts = 4) {
+const FALLBACK_MODELS = [
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+]
+
+function getModelList() {
+  return [...new Set([process.env.GEMINI_MODEL, ...FALLBACK_MODELS].filter(Boolean))]
+}
+
+export async function generateMystery(premise, difficulty, maxAttempts = 6) {
+  const models = getModelList()
+  let modelIndex = 0
   let lastError = null
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const model = models[modelIndex % models.length]
     try {
       const response = await getClient().models.generateContent({
-        model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
+        model,
         contents: buildPrompt(premise, difficulty, lastError),
         config: { responseMimeType: 'application/json', temperature: 0.9 },
       })
       const raw = parseAIJson(response.text)
       return validateMystery(raw, difficulty)
     } catch (err) {
-      console.error(`Gemini attempt ${attempt} failed:`, err.message)
+      console.error(`Gemini attempt ${attempt} (${model}) failed:`, err.message)
 
-      const overloaded = /503|UNAVAILABLE|429/.test(err.message)
-      if (overloaded) {
-        await sleep(attempt * 3000) // wait 3s, 6s, 9s...
+      const modelProblem = /503|UNAVAILABLE|429|404|NOT_FOUND/.test(err.message)
+      if (modelProblem) {
+        modelIndex++ // switch to the next model
+        await sleep(1500)
       } else {
-        lastError = err.message // only validation errors go back into the prompt
+        lastError = err.message // validation errors go back into the prompt
       }
     }
   }
